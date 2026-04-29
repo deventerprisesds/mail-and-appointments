@@ -1,0 +1,25 @@
+{
+  "name": "mail-and-appointments-api",
+  "version": "1.0.0",
+  "description": "Azure Functions middleware for multi-provider email and calendar aggregation",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "start": "npm run build && func start",
+    "dev": "concurrently \"npm run watch\" \"func start --verbose\""
+  },
+  "dependencies": {
+    "@azure/data-tables": "^13.3.0",
+    "@azure/functions": "^4.5.0",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "googleapis": "^144.0.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^20.0.0",
+    "concurrently": "^9.0.0",
+    "typescript": "^5.7.0"
+  },
+  "main": "dist/src/index.js"
+}
