@@ -1,13 +1,7 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { validateToken } from "../middleware/validateToken";
-import { getEmailCalendarTable } from "../storage/tableClient";
-
-interface CalendarEvent {
-  id: string;
-  description: string;
-  time: string;
-  provider: string;
-}
+import { getMicrosoftCalendarEvents } from "../providers/microsoft";
+import { getGoogleCalendarEvents } from "../providers/google";
 
 async function getCalendar(
   req: HttpRequest,
@@ -24,24 +18,10 @@ async function getCalendar(
       };
     }
 
-    const table = await getEmailCalendarTable();
-    const partitionKey = `calendar-${tokenCtx.accountId}`;
-
-    const events: CalendarEvent[] = [];
-    const entities = table.listEntities<CalendarEvent & { date: string }>({
-      queryOptions: {
-        filter: `PartitionKey eq '${partitionKey}' and date eq '${date}'`,
-      },
-    });
-
-    for await (const entity of entities) {
-      events.push({
-        id: entity.rowKey as string,
-        description: entity.description,
-        time: entity.time,
-        provider: entity.provider,
-      });
-    }
+    const events =
+      tokenCtx.provider === "microsoft"
+        ? await getMicrosoftCalendarEvents(tokenCtx.accessToken, date)
+        : await getGoogleCalendarEvents(tokenCtx.accessToken, date);
 
     context.log(`Fetched ${events.length} events for ${tokenCtx.accountId} on ${date}`);
     return { status: 200, jsonBody: events };
